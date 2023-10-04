@@ -25,6 +25,7 @@ from potato.server_utils.schemas import (
     generate_number_layout,
     generate_pure_display_layout,
     generate_select_layout,
+    generate_table_layout,
     generate_slider_layout,
 )
 
@@ -55,6 +56,7 @@ def generate_schematic(annotation_scheme):
         "highlight": generate_span_layout,
         "likert": generate_likert_layout,
         "text": generate_textbox_layout,
+        "table": generate_table_layout,
         "number": generate_number_layout,
         "pure_display": generate_pure_display_layout,
         "select": generate_select_layout,
@@ -403,8 +405,6 @@ def generate_surveyflow_pages(config):
     for key in surveyflow["order"]:
         surveyflow_list += surveyflow[key]
     for _file in surveyflow_list:
-        # check if the surveyflow pages are defined as a list or a dict
-        _file = _file if type(_file) == str else _file['file']
         if _file.split(".")[-1] == "jsonl":
             with open(_file, "r") as r:
                 for line in r:
@@ -520,19 +520,8 @@ def generate_surveyflow_pages(config):
 
     config["non_annotation_pages"] = []
     for key in surveyflow["order"]:
-        page_list = []
-        for it in config["surveyflow"][key]:
-            # if user define the surveyflow pages via a list, we create an item dict for each page
-            if type(it) == str:
-                item = {'id': config["surveyflow_site_file"][it.split(".")[0].split("/")[-1]]}
-            # if user define the surveyflow pages via a dict, we append all the values in it
-            elif type(it) == dict:
-                item = {'id': config["surveyflow_site_file"][it['file'].split(".")[0].split("/")[-1]]}
-                for k in it:
-                    item[k] = it
-            else:
-                print('ERROR: unsupported surveyflow %s type: '%(key, type(it)))
-            page_list.append(item)
-
-        config["%s_pages" % key] = page_list
-        config["non_annotation_pages"] += [it['id'] for it in config["%s_pages" % key]]
+        config["%s_pages" % key] = [
+            config["surveyflow_site_file"][it.split(".")[0].split("/")[-1]]
+            for it in config["surveyflow"][key]
+        ]
+        config["non_annotation_pages"] += config["%s_pages" % key]
