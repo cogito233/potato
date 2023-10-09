@@ -12,7 +12,8 @@ def generate_table_layout(annotation_scheme):
             % annotation_scheme["description"]
         )
     )
-    schematic += '<table>'
+    name = annotation_scheme["name"]
+    schematic += '<table id="dynamicTable_' + name + '">'
 
     # Create the table headers
     schematic += '<tr>'
@@ -42,18 +43,21 @@ def generate_table_layout(annotation_scheme):
                     '<td><textarea rows="1" cols="{}" class="{}" type="text" id="{}" name="{}" validation=""></textarea></td>'
                 ).format(widths[idx], annotation_scheme["name"], name, name)
             
-            elif annotation_scheme["type"][idx] == "multiselect":
-                options = annotation_scheme["select_option"].get(label, [])
-                schematic += '<td><select size="1" class="{}" name="{}">'.format(annotation_scheme["name"], name)
-                for option in options:
-                    schematic += '<option value="{}">{}</option>'.format(option, option)
-                schematic += '</select></td>'
+            else:
+                raise NotImplementedError
+                # annotation_scheme["type"][idx] == "multiselect":
+                # options = annotation_scheme["select_option"].get(label, [])
+                # schematic += '<td><select size="1" class="{}" name="{}">'.format(annotation_scheme["name"], name)
+                # for option in options:
+                #     schematic += '<option value="{}">{}</option>'.format(option, option)
+                # schematic += '</select></td>'
                 
         schematic += '</tr>'
 
     # End the table schematic
     schematic += '</table>'
-    schematic += "</fieldset>\n</form>\n"
+    schematic += '<button onclick="addRow_'+name+'()">Add Row</button>'
+    schematic += "</fieldset></form>\n"
 
     return schematic, []
 
@@ -67,7 +71,7 @@ if __name__ == "__main__":
         "description": "User Comments",
         "name": "user_comment",
         "labels": ["outline index 1", "outline index 2", "contradiction type"],
-        "type": ["text", "text", "multiselect"],
+        "type": ["text", "text", "text"],
         "select_option": {
             "contradiction type": ["redundant contradiction", "fact contradiction", "might contradiction"]
         },
